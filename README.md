@@ -1,70 +1,85 @@
-**status geral do projeto** com base em **tudo já foi feito até agora** comparando com os **requisitos do trabalho** da faculdade.
 
 ---
 
-## ✅ **O QUE JÁ FOI FEITO ATÉ AGORA**
+## ✅ LISTA COMPLETA - O QUE FAZER PARA REALIZAR O PROJETO
 
-| Item | Status | Observação |
-|------|--------|------------|
-| Projeto Spring Boot com Maven | ✅ | Estrutura criada com sucesso |
-| Classe principal `LojaOnlineApplication` | ✅ | Compilando e rodando |
-| Configuração do banco MySQL | ✅ | Banco criado (`lojaonline`) e configurado |
-| Dependência MySQL no `pom.xml` | ✅ | Adicionada e sincronizada com o Maven |
-| Entidades `Produto`, `Cliente`, `Lojista`, `Carrinho` | ✅ | Prontas e organizadas no pacote `model` |
-| Repositórios `ProdutoRepository`, `ClienteRepository`, `LojistaRepository` | ✅ | Criados e com métodos de busca por email/senha |
-| `application.properties` configurado | ✅ | Com dados do MySQL e Hibernate |
-| Teste da aplicação inicial com MySQL | ✅ | Tabelas estão sendo criadas automaticamente |
-
----
-
-## ⏳ **ONDE VOCÊ ESTÁ AGORA:**
-
-📌 **Tudo do back-end básico (entidades + banco + conexão)** está pronto!  
-➡️ Agora você pode começar as partes funcionais, como **login, listagem de produtos, carrinho**, etc.
+### 1. Estrutura Inicial do Projeto
+- [ ] Criar um projeto Spring Boot com Spring Web
+- [ ] Organizar as pastas:
+```
+src/
+├── controller/
+├── model/
+├── service/
+├── filter/
+└── resources/templates/
+```
 
 ---
 
-## 🔧 **PRÓXIMOS PASSOS (o que ainda falta):**
-
-### 🟡 **Autenticação e Sessão**
-- [ ] Criar `LoginController` com autenticação de cliente ou lojista
-- [ ] Salvar o tipo de usuário na `HttpSession`
-- [ ] Criar `LogoutController` para destruir a sessão
-
----
-
-### 🟡 **Carrinho e Produtos**
-- [ ] Criar `ProdutoController` com listagem dos produtos
-- [ ] Criar `CarrinhoController` com métodos `add`, `remove`, `ver`, `finalizar`
-- [ ] Salvar o carrinho em `HttpSession` com timeout de 20min
-- [ ] Finalizar compra e atualizar estoque
+### 2. Cadastro e Login de Clientes e Lojistas
+- [ ] Criar modelo `Cliente` e `Lojista` com: nome, email, senha
+- [ ] Criar `LoginController`
+- [ ] Criar método `POST /login` para verificar:
+    - Se é cliente ou lojista
+    - Criar sessão com `session.setAttribute("usuario", ...)`
+- [ ] Criar método `GET /logout`:
+    - `session.invalidate()`
+    - Redirecionar para `/login`
 
 ---
 
-### 🟡 **Área do Lojista**
-- [ ] Tela e controller para cadastrar novos produtos
-- [ ] Tela para o lojista ver a lista de produtos com estoque
+### 3. Criar Filtro de Autenticação
+- [ ] Criar classe com `@WebFilter(urlPatterns = "/restrito/*")`
+- [ ] Verificar se há sessão com atributo `usuario`
+- [ ] Redirecionar para `/login` se não autenticado
 
 ---
 
-### 🟡 **Frontend / Views**
-- [ ] Tela de login
-- [ ] Tela de cadastro de cliente
-- [ ] Tela de produtos (cliente)
-- [ ] Tela de carrinho
-- [ ] Tela de produtos do lojista
-- [ ] Tela de cadastro de produto
+### 4. Carrinho de Compras (com sessão)
+- [ ] Criar classe `Carrinho` com `List<Produto>`
+- [ ] Métodos: `addProduto(Produto p)`, `removeProduto(int id)`
+- [ ] Salvar o carrinho na sessão: `session.setAttribute("carrinho", carrinho)`
+- [ ] Criar `CarrinhoController`:
+    - Comandos: `?comando=add&id=3`, `?comando=remove&id=3`
+- [ ] Criar `VerCarrinhoController`:
+    - Mostra produtos no carrinho
+    - Redireciona para `/listarProdutos` se o carrinho não existir
 
 ---
 
-### 🟡 **Entrega**
-- [ ] Testar todas as funcionalidades
-- [ ] Criar vídeo demonstrando cada caso de uso
-- [ ] Subir projeto no GitHub e enviar pelo SIGAA
+### 5. Produtos
+- [ ] Criar modelo `Produto` com: id, nome, descrição, preço, quantidade
+- [ ] Criar `ProdutoService` com uma lista estática (simulando banco)
+- [ ] Criar `ProdutoController` com:
+    - `GET /listarProdutos` → mostra os produtos
+    - `POST /cadastrarProduto` → para lojistas cadastrarem produtos
+- [ ] Visualização do estoque para lojistas
 
 ---
 
-## 🧭 **Sugestão imediata:**
-Vamos partir pro **LoginController**, com autenticação básica usando `ClienteRepository` e `LojistaRepository`.
+### 6. Finalizar Compra
+- [ ] Criar rota `/finalizarCompra`:
+    - Somar os valores dos produtos do carrinho
+    - Reduzir quantidade do estoque
+    - Limpar carrinho da sessão
 
-Posso te mandar agora o código pronto e comentado, quer?
+---
+
+### 7. Páginas HTML (Templates simples)
+- [ ] `login.html`
+- [ ] `cadastro.html`
+- [ ] `listarProdutos.html`
+- [ ] `verCarrinho.html`
+- [ ] `cadastrarProduto.html`
+
+---
+
+### 8. Testes e Demonstração
+- [ ] Testar login/logout como cliente e lojista
+- [ ] Testar adicionar/remover produtos do carrinho
+- [ ] Testar redirecionamentos (com ou sem sessão)
+- [ ] Definir tempo de sessão: `server.servlet.session.timeout=20m`
+- [ ] Criar vídeo com a demo + subir projeto no GitHub
+
+---
