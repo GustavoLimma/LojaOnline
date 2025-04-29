@@ -29,14 +29,17 @@ public class ListaProdutosController {
             this.quantidade = quantidade;
         }
 
+        public Produto() {}
+
         public int getId() { return id; }
         public String getNome() { return nome; }
         public double getPreco() { return preco; }
         public int getQuantidade() { return quantidade; }
 
-        public void setQuantidade(int quantidade) {
-            this.quantidade = quantidade;
-        }
+        public void setQuantidade(int quantidade) { this.quantidade = quantidade; }
+        public void setNome(String nome) { this.nome = nome; }
+        public void setId(int id) { this.id = id; }
+        public void setPreco(double preco) { this.preco = preco; }
     }
 
     public static Produto getProdutoById(int id) {
