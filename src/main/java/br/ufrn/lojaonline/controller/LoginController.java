@@ -45,7 +45,7 @@ public class LoginController {
     }
 
     static {
-        clientes.add(new Cliente("João Pedro", "jp2017@uol.com.br", "12"));
+        clientes.add(new Cliente("João Pedro", "jp2017@uol.com.br", "12345jaum"));
         clientes.add(new Cliente("Amara Silva", "amarasil@bol.com.br", "amara82"));
         clientes.add(new Cliente("Maria Pereira", "mariape@terra.com.br", "145aektm"));
 
