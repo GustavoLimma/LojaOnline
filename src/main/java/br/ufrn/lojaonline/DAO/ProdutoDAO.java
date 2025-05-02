@@ -1,63 +1,72 @@
-package br.ufrn.lojaonline.DAO;
+package br.ufrn.lojaonline.dao;
 
-import br.ufrn.lojaonline.controller.ListaProdutosController;
-
+import br.ufrn.lojaonline.controller.ProdutoController.Produto;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProdutoDAO {
 
-    private Connection conectar() throws SQLException {
-        return DriverManager.getConnection("jdbc:sqlite:loja.db");
-    }
-
-    public void inserir(ListaProdutosController.Produto produto) {
-        String sql = "INSERT INTO produto (nome, preco) VALUES (?, ?)";
-        try (Connection conn = conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, produto.getNome());
-            stmt.setDouble(2, produto.getPreco());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public List<ListaProdutosController.Produto> listar() {
-        List<ListaProdutosController.Produto> produtos = new ArrayList<>();
+    public List<Produto> listarProdutos() {
+        List<Produto> produtos = new ArrayList<>();
         String sql = "SELECT * FROM produto";
-        try (Connection conn = conectar(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
             while (rs.next()) {
-                ListaProdutosController.Produto p = new ListaProdutosController.Produto();
-                p.setId(rs.getInt("id"));
-                p.setNome(rs.getString("nome"));
-                p.setPreco(rs.getDouble("preco"));
-                produtos.add(p);
+                int id = rs.getInt("id");
+                String nome = rs.getString("nome");
+                String descricao = rs.getString("descricao");
+                double preco = rs.getDouble("preco");
+                int quantidade = rs.getInt("estoque");
+
+                produtos.add(new Produto(id, nome, descricao, preco, quantidade));
             }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao listar produtos: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+
         return produtos;
     }
 
-    public void deletar(int id) {
-        String sql = "DELETE FROM produto WHERE id = ?";
-        try (Connection conn = conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
+    public void salvarProduto(String nome, String descricao, double preco, int estoque) {
+        String sql = "INSERT INTO produto (nome, descricao, preco, estoque) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, nome);
+            stmt.setString(2, descricao);
+            stmt.setDouble(3, preco);
+            stmt.setInt(4, estoque);
             stmt.executeUpdate();
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao salvar produto: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public void atualizar(ListaProdutosController.Produto produto) {
-        String sql = "UPDATE produto SET nome = ?, preco = ? WHERE id = ?";
-        try (Connection conn = conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, produto.getNome());
-            stmt.setDouble(2, produto.getPreco());
-            stmt.setInt(3, produto.getId());
+    public void atualizarEstoque(int id, int quantidadeComprada) {
+        String sql = "UPDATE produto SET estoque = estoque - ? WHERE id = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, quantidadeComprada);
+            stmt.setInt(2, id);
             stmt.executeUpdate();
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao atualizar estoque: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

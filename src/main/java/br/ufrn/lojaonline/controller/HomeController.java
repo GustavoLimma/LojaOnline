@@ -14,6 +14,6 @@ public class HomeController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public void home(HttpServletResponse response) throws IOException {
-        response.sendRedirect("login.html");
+        response.sendRedirect("login");
     }
 }

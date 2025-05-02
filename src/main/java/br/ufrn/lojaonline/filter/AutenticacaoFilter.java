@@ -18,7 +18,7 @@ public class AutenticacaoFilter implements Filter {
         HttpSession session = request.getSession(false);
 
         if (session == null || session.getAttribute("usuario") == null) {
-            response.sendRedirect("login.html");
+            response.sendRedirect("login");
             return;
         }
 

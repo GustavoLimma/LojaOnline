@@ -1,11 +1,14 @@
 package br.ufrn.lojaonline.controller;
 
+import br.ufrn.lojaonline.dao.ClienteDAO;
+import br.ufrn.lojaonline.dao.LojistaDAO;
 import jakarta.servlet.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 @Controller
@@ -25,6 +28,7 @@ public class LoginController {
             this.senha = senha;
         }
 
+        public String getNome() { return nome; }
         public String getEmail() { return email; }
         public String getSenha() { return senha; }
     }
@@ -40,17 +44,42 @@ public class LoginController {
             this.senha = senha;
         }
 
+        public String getNome() { return nome; }
         public String getEmail() { return email; }
         public String getSenha() { return senha; }
     }
 
-    static {
-        clientes.add(new Cliente("João Pedro", "jp2017@uol.com.br", "12345jaum"));
-        clientes.add(new Cliente("Amara Silva", "amarasil@bol.com.br", "amara82"));
-        clientes.add(new Cliente("Maria Pereira", "mariape@terra.com.br", "145aektm"));
+    private final ClienteDAO clienteDAO = new ClienteDAO();
+    private final LojistaDAO lojistaDAO = new LojistaDAO();
 
-        lojistas.add(new Lojista("Taniro Rodrigues", "tanirocr@gmail.com", "123456abc"));
-        lojistas.add(new Lojista("Lorena Silva", "lore_sil@yahoo.com.br", "12uhuuu@"));
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public void doGetLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        out.println("""
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Login</title>
+                </head>
+                <body>
+                <h1>Login</h1>
+                <form action="login" method="POST">
+                    <label for="email">Email:</label>
+                    <input id="email" name="email" type="email" required><br>
+
+                    <label for="senha">Senha:</label>
+                    <input id="senha" name="senha" type="password" required><br>
+
+                    <input type="submit" value="Entrar">
+                </form>
+                <br>
+                <a href="cadastro">Cadastrar novo usuário</a>
+                </body>
+                </html>
+                """);
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -61,34 +90,38 @@ public class LoginController {
         HttpSession session = request.getSession();
         session.setMaxInactiveInterval(20 * 60);
 
-        for (Cliente c : clientes) {
-            if (c.getEmail().equals(email) && c.getSenha().equals(senha)) {
-                session.setAttribute("usuario", c);
+        try {
+            Cliente cliente = clienteDAO.buscarPorEmailESenha(email, senha);
+            if (cliente != null) {
+                session.setAttribute("usuario", cliente);
                 session.setAttribute("tipo", "cliente");
                 response.sendRedirect("produtos");
                 return;
             }
-        }
 
-        for (Lojista l : lojistas) {
-            if (l.getEmail().equals(email) && l.getSenha().equals(senha)) {
-                session.setAttribute("usuario", l);
+            Lojista lojista = lojistaDAO.buscarPorEmailESenha(email, senha);
+            if (lojista != null) {
+                session.setAttribute("usuario", lojista);
                 session.setAttribute("tipo", "lojista");
                 response.sendRedirect("estoque");
                 return;
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("login");
+            return;
         }
 
-        response.sendRedirect("login.html");
+        response.sendRedirect("login");
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    public void doLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
         }
-        response.sendRedirect("login.html");
+        response.sendRedirect("login");
     }
 }
